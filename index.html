@@ -35,23 +35,126 @@
 }
 
 
-.agree-option {
+/* =====================================================
+   게스트 신청 동의사항
+===================================================== */
+
+.agree-title {
+
+    margin:
+        0 0 10px;
+
+    font-size: 15px;
+
+    font-weight: 800;
+
+    color: #202020;
+
+}
+
+
+.agree-text {
+
+    margin-bottom: 10px;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+    color: #444;
+
+    white-space: normal;
+
+}
+
+
+.agree-address {
+
+    margin:
+        10px 0 13px;
+
+    padding:
+        10px 12px;
+
+    border-radius: 8px;
+
+    background:
+        #f2f8fc;
+
+    color:
+        #105c96;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    text-align: center;
+
+}
+
+
+.agree-choice {
 
     display: flex;
 
-    align-items: flex-start;
-
     gap: 8px;
+
+}
+
+
+.agree-radio {
+
+    flex: 1;
 
     margin: 0 !important;
 
-    font-size: 12px !important;
+}
 
-    line-height: 1.5;
 
-    font-weight: 500 !important;
+.agree-radio input {
+
+    display: none;
+
+}
+
+
+.agree-radio span {
+
+    display: block;
+
+    padding:
+        10px 8px;
+
+    border:
+        1px solid #dfe5e9;
+
+    border-radius: 8px;
+
+    background:
+        #ffffff;
+
+    text-align: center;
+
+    font-size: 12px;
+
+    font-weight: 600;
 
     cursor: pointer;
+
+}
+
+
+.agree-radio input:checked + span {
+
+    border:
+        2px solid #105c96;
+
+    background:
+        #f2f8fc;
+
+    color:
+        #105c96;
+
 }
 
 
@@ -1720,54 +1823,118 @@ footer {
     action="https://script.google.com/macros/s/AKfycbyLna-Zl8L5uJ9cJ-ASZlzmYHjWaMRbAKF5HQgYQc7MZOAZlIWoGlibOTVNBGE92tOD/exec"
     method="POST"
     target="submitFrame"
-    onsubmit="submitGuestForm()">
-
+onsubmit="return submitGuestForm()"
 
     <!-- =========================
-         안내사항 동의
-    ========================== -->
+     게스트 훈련 및 입금 동의
+========================== -->
 
-    <div class="agree-box">
+<div class="agree-box">
 
-        <label class="agree-option">
+    <h3
+        id="noticeAgreeTitle"
+        class="agree-title">
+    </h3>
+
+
+    <div
+        id="noticeAgreeText"
+        class="agree-text">
+    </div>
+
+
+    <div
+        id="noticeAddress"
+        class="agree-address">
+    </div>
+
+
+    <div class="agree-choice">
+
+        <label class="agree-radio">
 
             <input
-                type="checkbox"
+                type="radio"
                 name="noticeAgree"
                 value="동의"
                 required>
 
             <span>
-                안내사항을 확인했으며 동의합니다.
+                동의합니다
+            </span>
+
+        </label>
+
+
+        <label class="agree-radio">
+
+            <input
+                type="radio"
+                name="noticeAgree"
+                value="동의하지 않습니다">
+
+            <span>
+                동의하지 않습니다
             </span>
 
         </label>
 
     </div>
 
+</div>
 
-    <!-- =========================
-         개인정보 수집 및 이용 동의
-    ========================== -->
 
-    <div class="agree-box">
+<!-- =========================
+     개인정보 수집 및 이용 동의
+========================== -->
 
-        <label class="agree-option">
+<div class="agree-box">
+
+    <h3
+        id="privacyAgreeTitle"
+        class="agree-title">
+    </h3>
+
+
+    <div
+        id="privacyAgreeText"
+        class="agree-text">
+    </div>
+
+
+    <div class="agree-choice">
+
+        <label class="agree-radio">
 
             <input
-                type="checkbox"
+                type="radio"
                 name="privacyAgree"
                 value="동의"
                 required>
 
             <span>
-                개인정보 수집 및 이용에 동의합니다.
+                동의합니다
+            </span>
+
+        </label>
+
+
+        <label class="agree-radio">
+
+            <input
+                type="radio"
+                name="privacyAgree"
+                value="동의하지 않습니다">
+
+            <span>
+                동의하지 않습니다
             </span>
 
         </label>
 
     </div>
 
+</div>
 
     <!-- =========================
          이름
@@ -3759,6 +3926,55 @@ function closeGuestForm() {
 
 function submitGuestForm() {
 
+    const noticeAgree =
+        document.querySelector(
+            'input[name="noticeAgree"]:checked'
+        );
+
+
+    const privacyAgree =
+        document.querySelector(
+            'input[name="privacyAgree"]:checked'
+        );
+
+
+    /*
+       안내사항에 동의하지 않은 경우
+    */
+
+    if (
+        !noticeAgree ||
+        noticeAgree.value !== "동의"
+    ) {
+
+        alert(
+            "게스트 훈련 및 입금 동의에 동의해야 신청할 수 있습니다."
+        );
+
+        return false;
+
+    }
+
+
+    /*
+       개인정보 수집 및 이용에
+       동의하지 않은 경우
+    */
+
+    if (
+        !privacyAgree ||
+        privacyAgree.value !== "동의"
+    ) {
+
+        alert(
+            "개인정보 수집 및 이용에 동의해야 신청할 수 있습니다."
+        );
+
+        return false;
+
+    }
+
+
     const message =
         document.getElementById(
             "submitMessage"
@@ -3989,8 +4205,85 @@ function applySiteData() {
 
 
     /* ========================================
-       NOTICE
-    ======================================== */
+   GUEST AGREEMENT
+======================================== */
+
+const noticeAgreeTitle =
+    document.getElementById(
+        "noticeAgreeTitle"
+    );
+
+
+const noticeAgreeText =
+    document.getElementById(
+        "noticeAgreeText"
+    );
+
+
+const noticeAddress =
+    document.getElementById(
+        "noticeAddress"
+    );
+
+
+const privacyAgreeTitle =
+    document.getElementById(
+        "privacyAgreeTitle"
+    );
+
+
+const privacyAgreeText =
+    document.getElementById(
+        "privacyAgreeText"
+    );
+
+
+/*
+   게스트 훈련 및 입금 동의
+*/
+
+if (noticeAgreeTitle) {
+
+    noticeAgreeTitle.innerText =
+        siteData.NOTICE_AGREE_TITLE || "";
+
+}
+
+
+if (noticeAgreeText) {
+
+    noticeAgreeText.innerHTML =
+        siteData.NOTICE_AGREE_TEXT || "";
+
+}
+
+
+if (noticeAddress) {
+
+    noticeAddress.innerText =
+        siteData.NOTICE_ADDRESS || "";
+
+}
+
+
+/*
+   개인정보 수집 및 이용 동의
+*/
+
+if (privacyAgreeTitle) {
+
+    privacyAgreeTitle.innerText =
+        siteData.PRIVACY_AGREE_TITLE || "";
+
+}
+
+
+if (privacyAgreeText) {
+
+    privacyAgreeText.innerHTML =
+        siteData.PRIVACY_AGREE_TEXT || "";
+
+}
 
     const noticeSection =
         document.getElementById(
