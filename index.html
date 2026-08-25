@@ -2002,27 +2002,19 @@ function renderCalendar() {
     const calendar =
         document.getElementById("calendar");
 
-
     const monthTitle =
         document.getElementById("monthTitle");
 
-
     if (!calendar || !monthTitle) {
-
         return;
-
     }
 
-
     calendar.innerHTML = "";
-
 
     monthTitle.innerText =
         currentYear +
         "." +
-        String(
-            currentMonth + 1
-        ).padStart(2, "0");
+        String(currentMonth + 1).padStart(2, "0");
 
 
     const firstDay =
@@ -2041,6 +2033,10 @@ function renderCalendar() {
         ).getDate();
 
 
+    /*
+    빈 날짜
+    */
+
     for (
         let i = 0;
         i < firstDay;
@@ -2050,15 +2046,17 @@ function renderCalendar() {
         const empty =
             document.createElement("div");
 
-
         empty.className =
             "day empty";
-
 
         calendar.appendChild(empty);
 
     }
 
+
+    /*
+    날짜 생성
+    */
 
     for (
         let date = 1;
@@ -2069,25 +2067,29 @@ function renderCalendar() {
         const day =
             document.createElement("div");
 
-
         day.className =
             "day";
 
 
+        /*
+        날짜 숫자
+        */
+
         const number =
             document.createElement("span");
-
 
         number.className =
             "day-number";
 
-
         number.innerText =
             date;
 
-
         day.appendChild(number);
 
+
+        /*
+        YYYY-MM-DD
+        */
 
         const dateKey =
             currentYear +
@@ -2099,6 +2101,10 @@ function renderCalendar() {
             String(date).padStart(2, "0");
 
 
+        /*
+        게스트 데이터
+        */
+
         const data =
             guestData[dateKey] || {
 
@@ -2108,114 +2114,252 @@ function renderCalendar() {
             };
 
 
+        /*
+        일정 데이터
+        */
+
         const schedule =
             scheduleData[dateKey];
 
 
+        /*
+        일정이 있는 날짜만
+        모집 현황 표시
+        */
+
         if (schedule) {
 
-    const info =
-        document.createElement("div");
+            const info =
+                document.createElement("div");
 
-    info.className =
-        "day-info";
-
-
-    const status =
-        String(schedule.status || "").trim();
+            info.className =
+                "day-info";
 
 
-    /*
-    ========================================
-    모집 상태별 표시
-    ========================================
-    */
-
-    if (status === "마감") {
-
-        info.innerHTML = `
-
-            <span class="c">
-                마감
-            </span>
-
-        `;
-
-    }
-
-    else if (status === "대기") {
-
-        info.innerHTML = `
-
-            <span class="c">
-                대기
-            </span>
-
-        `;
-
-    }
-
-    else {
-
-        /*
-        모집 중인 경우
-        남/여 게스트 현황 표시
-        */
-
-        info.innerHTML = `
-
-            <span class="m">
-                ${data.male}/3
-            </span>
-
-            <br>
-
-            <span class="f">
-                ${data.female}/3
-            </span>
-
-        `;
+            const status =
+                String(
+                    schedule.status || ""
+                ).trim();
 
 
-        /*
-        남녀 모두 정원이 차면
-        자동으로 마감 표시
-        */
+            /*
+            Google Sheets에서
+            설정한 남자/여자 정원
+            */
 
-        if (
-            data.male >= 3 &&
-            data.female >= 3
-        ) {
+            const maleLimit =
+                Number(
+                    schedule.maleLimit ?? 3
+                );
 
-            info.innerHTML = `
 
-                <span class="m">
-                    ${data.male}/3
-                </span>
+            const femaleLimit =
+                Number(
+                    schedule.femaleLimit ?? 3
+                );
 
-                <br>
 
-                <span class="f">
-                    ${data.female}/3
-                </span>
+            /*
+            모집 상태
+            */
 
-                <br>
+            if (status === "마감") {
 
-                <span class="c">
-                    마감
-                </span>
+                info.innerHTML = `
 
-            `;
+                    <span class="c">
+                        마감
+                    </span>
+
+                `;
+
+            }
+
+            else if (status === "대기") {
+
+                info.innerHTML = `
+
+                    <span class="c">
+                        대기
+                    </span>
+
+                `;
+
+            }
+
+            else {
+
+                /*
+                모집 중
+
+                정원이 0인 성별은
+                달력에서도 표시하지 않음
+                */
+
+                let calendarInfo = "";
+
+
+                if (maleLimit > 0) {
+
+                    calendarInfo += `
+
+                        <span class="m">
+                            ${data.male}/${maleLimit}
+                        </span>
+
+                    `;
+
+                }
+
+
+                if (
+                    maleLimit > 0 &&
+                    femaleLimit > 0
+                ) {
+
+                    calendarInfo += "<br>";
+
+                }
+
+
+                if (femaleLimit > 0) {
+
+                    calendarInfo += `
+
+                        <span class="f">
+                            ${data.female}/${femaleLimit}
+                        </span>
+
+                    `;
+
+                }
+
+
+                /*
+                남자와 여자 모두
+                정원이 0이면
+                마감으로 표시
+                */
+
+                if (
+                    maleLimit <= 0 &&
+                    femaleLimit <= 0
+                ) {
+
+                    calendarInfo = `
+
+                        <span class="c">
+                            마감
+                        </span>
+
+                    `;
+
+                }
+
+
+                /*
+                남녀 모두 정원이 차면
+                자동 마감
+                */
+
+                else if (
+                    maleLimit > 0 &&
+                    femaleLimit > 0 &&
+                    data.male >= maleLimit &&
+                    data.female >= femaleLimit
+                ) {
+
+                    calendarInfo = `
+
+                        <span class="m">
+                            ${data.male}/${maleLimit}
+                        </span>
+
+                        <br>
+
+                        <span class="f">
+                            ${data.female}/${femaleLimit}
+                        </span>
+
+                        <br>
+
+                        <span class="c">
+                            마감
+                        </span>
+
+                    `;
+
+                }
+
+                /*
+                남자만 모집하고
+                남자 정원이 찬 경우
+                */
+
+                else if (
+                    maleLimit > 0 &&
+                    femaleLimit <= 0 &&
+                    data.male >= maleLimit
+                ) {
+
+                    calendarInfo = `
+
+                        <span class="m">
+                            ${data.male}/${maleLimit}
+                        </span>
+
+                        <br>
+
+                        <span class="c">
+                            마감
+                        </span>
+
+                    `;
+
+                }
+
+                /*
+                여자만 모집하고
+                여자 정원이 찬 경우
+                */
+
+                else if (
+                    maleLimit <= 0 &&
+                    femaleLimit > 0 &&
+                    data.female >= femaleLimit
+                ) {
+
+                    calendarInfo = `
+
+                        <span class="f">
+                            ${data.female}/${femaleLimit}
+                        </span>
+
+                        <br>
+
+                        <span class="c">
+                            마감
+                        </span>
+
+                    `;
+
+                }
+
+
+                info.innerHTML =
+                    calendarInfo;
+
+            }
+
+
+            day.appendChild(info);
 
         }
 
-    }
 
-
-    day.appendChild(info);
-
-}
-
+        /*
+        날짜 클릭
+        */
 
         day.onclick =
             function() {
@@ -2255,79 +2399,269 @@ function showDateDetail(
 
 
     if (!detail) {
-
         return;
-
     }
 
 
     const male =
-        data ? data.male : 0;
+        data ? Number(data.male || 0) : 0;
 
 
     const female =
-        data ? data.female : 0;
+        data ? Number(data.female || 0) : 0;
 
 
     const dayOfWeek =
         getDayOfWeek(dateKey);
 
 
+    /*
+    일정이 없는 날짜
+    */
+
     if (!schedule) {
 
-    detail.innerHTML = `
+        detail.innerHTML = `
 
-        <h3>
+            <h3>
 
-            ${currentYear}년
-            ${currentMonth + 1}월
-            ${date}일
-            (${dayOfWeek})
+                ${currentYear}년
+                ${currentMonth + 1}월
+                ${date}일
+                (${dayOfWeek})
 
-        </h3>
+            </h3>
 
-        <p>
+            <p>
 
-            이 날짜에는 게스트 일정이 없습니다.
+                이 날짜에는 게스트 일정이 없습니다.
 
-        </p>
+            </p>
 
-    `;
+        `;
 
-    return;
+        return;
 
-}
-
-
-/*
-========================================
-모집 상태
-========================================
-*/
-
-const status =
-    String(schedule.status || "").trim();
+    }
 
 
-/*
-========================================
-마감
-========================================
-*/
+    /*
+    모집 상태
+    */
 
-if (status === "마감") {
+    const status =
+        String(
+            schedule.status || ""
+        ).trim();
 
-    detail.innerHTML = `
 
-        <h3>
+    /*
+    남자 / 여자 정원
+    */
 
-            ${currentYear}년
-            ${currentMonth + 1}월
-            ${date}일
-            (${dayOfWeek})
+    const maleLimit =
+        Number(
+            schedule.maleLimit ?? 3
+        );
 
-        </h3>
 
+    const femaleLimit =
+        Number(
+            schedule.femaleLimit ?? 3
+        );
+
+
+    /*
+    ========================================
+    마감
+    ========================================
+    */
+
+    if (status === "마감") {
+
+        detail.innerHTML = `
+
+            <h3>
+
+                ${currentYear}년
+                ${currentMonth + 1}월
+                ${date}일
+                (${dayOfWeek})
+
+            </h3>
+
+
+            <div class="detail-row">
+
+                <span>
+                    🕐 시간
+                </span>
+
+                <strong>
+                    ${schedule.time || ""}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <span>
+                    📌 상태
+                </span>
+
+                <strong>
+                    마감
+                </strong>
+
+            </div>
+
+
+            <p style="
+                margin:18px 0 0;
+                text-align:center;
+                font-weight:700;
+            ">
+
+                해당 날짜는 모집이 마감되었습니다.
+
+            </p>
+
+        `;
+
+        return;
+
+    }
+
+
+    /*
+    ========================================
+    대기
+    ========================================
+    */
+
+    if (status === "대기") {
+
+        detail.innerHTML = `
+
+            <h3>
+
+                ${currentYear}년
+                ${currentMonth + 1}월
+                ${date}일
+                (${dayOfWeek})
+
+            </h3>
+
+
+            <div class="detail-row">
+
+                <span>
+                    🕐 시간
+                </span>
+
+                <strong>
+                    ${schedule.time || ""}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <span>
+                    📌 상태
+                </span>
+
+                <strong>
+                    대기
+                </strong>
+
+            </div>
+
+
+            <p style="
+                margin:18px 0 0;
+                text-align:center;
+                font-weight:700;
+            ">
+
+                해당 날짜는 모집 대기중입니다.
+
+            </p>
+
+        `;
+
+        return;
+
+    }
+
+
+    /*
+    ========================================
+    모집 중
+    ========================================
+    */
+
+
+    let detailRows = "";
+
+
+    /*
+    남자 정원이 0보다 큰 경우만 표시
+    */
+
+    if (maleLimit > 0) {
+
+        detailRows += `
+
+            <div class="detail-row">
+
+                <span>
+                    🔵 남자 게스트
+                </span>
+
+                <strong>
+                    ${male} / ${maleLimit}명
+                </strong>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /*
+    여자 정원이 0보다 큰 경우만 표시
+    */
+
+    if (femaleLimit > 0) {
+
+        detailRows += `
+
+            <div class="detail-row">
+
+                <span>
+                    🔴 여자 게스트
+                </span>
+
+                <strong>
+                    ${female} / ${femaleLimit}명
+                </strong>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /*
+    시간
+    */
+
+    detailRows += `
 
         <div class="detail-row">
 
@@ -2341,160 +2675,16 @@ if (status === "마감") {
 
         </div>
 
-
-        <div class="detail-row">
-
-            <span>
-                📌 상태
-            </span>
-
-            <strong>
-                마감
-            </strong>
-
-        </div>
-
-
-        <p style="
-            margin:18px 0 0;
-            text-align:center;
-            font-weight:700;
-        ">
-
-            해당 날짜는 모집이 마감되었습니다.
-
-        </p>
-
     `;
 
-    return;
 
-}
+    /*
+    소개
+    */
 
+    if (schedule.description) {
 
-/*
-========================================
-대기
-========================================
-*/
-
-if (status === "대기") {
-
-    detail.innerHTML = `
-
-        <h3>
-
-            ${currentYear}년
-            ${currentMonth + 1}월
-            ${date}일
-            (${dayOfWeek})
-
-        </h3>
-
-
-        <div class="detail-row">
-
-            <span>
-                🕐 시간
-            </span>
-
-            <strong>
-                ${schedule.time || ""}
-            </strong>
-
-        </div>
-
-
-        <div class="detail-row">
-
-            <span>
-                📌 상태
-            </span>
-
-            <strong>
-                대기
-            </strong>
-
-        </div>
-
-
-        <p style="
-            margin:18px 0 0;
-            text-align:center;
-            font-weight:700;
-        ">
-
-            해당 날짜는 모집 대기중입니다.
-
-        </p>
-
-    `;
-
-    return;
-
-}
-
-
-/*
-========================================
-모집
-========================================
-*/
-
-detail.innerHTML = `
-
-    <h3>
-
-        ${currentYear}년
-        ${currentMonth + 1}월
-        ${date}일
-        (${dayOfWeek})
-
-    </h3>
-
-
-    <div class="detail-row">
-
-        <span>
-            🔵 남자 게스트
-        </span>
-
-        <strong>
-            ${male} / 3명
-        </strong>
-
-    </div>
-
-
-    <div class="detail-row">
-
-        <span>
-            🔴 여자 게스트
-        </span>
-
-        <strong>
-            ${female} / 3명
-        </strong>
-
-    </div>
-
-
-    <div class="detail-row">
-
-        <span>
-            🕐 시간
-        </span>
-
-        <strong>
-            ${schedule.time || ""}
-        </strong>
-
-    </div>
-
-
-    ${
-        schedule.description
-            ? `
+        detailRows += `
 
             <div class="detail-row">
 
@@ -2508,11 +2698,35 @@ detail.innerHTML = `
 
             </div>
 
-            `
-            : ""
+        `;
+
     }
 
-`;
+
+    /*
+    남자/여자 모두 모집하지 않는 경우
+    */
+
+    if (
+        maleLimit <= 0 &&
+        femaleLimit <= 0
+    ) {
+
+        detailRows += `
+
+            <p style="
+                margin:18px 0 0;
+                text-align:center;
+                font-weight:700;
+            ">
+
+                해당 날짜는 모집하지 않습니다.
+
+            </p>
+
+        `;
+
+    }
 
 
     detail.innerHTML = `
@@ -2526,70 +2740,11 @@ detail.innerHTML = `
 
         </h3>
 
-
-        <div class="detail-row">
-
-            <span>
-                🔵 남자 게스트
-            </span>
-
-            <strong>
-                ${male} / 3명
-            </strong>
-
-        </div>
-
-
-        <div class="detail-row">
-
-            <span>
-                🔴 여자 게스트
-            </span>
-
-            <strong>
-                ${female} / 3명
-            </strong>
-
-        </div>
-
-
-        <div class="detail-row">
-
-            <span>
-                🕐 시간
-            </span>
-
-            <strong>
-                ${schedule.time || ""}
-            </strong>
-
-        </div>
-
-
-        ${
-            schedule.description
-                ? `
-
-                <div class="detail-row">
-
-                    <span>
-                        📌 안내
-                    </span>
-
-                    <strong>
-                        ${schedule.description}
-                    </strong>
-
-                </div>
-
-                `
-                : ""
-        }
+        ${detailRows}
 
     `;
 
 }
-
 
 /* =====================================================
    이전 달
@@ -2650,11 +2805,13 @@ function loadScheduleOptions() {
 
 
     if (!select) {
-
         return;
-
     }
 
+
+    /*
+    날짜 선택 초기화
+    */
 
     select.innerHTML = `
 
@@ -2666,6 +2823,10 @@ function loadScheduleOptions() {
 
     `;
 
+
+    /*
+    일정 날짜 가져오기
+    */
 
     const dates =
         Object.keys(
@@ -2695,6 +2856,68 @@ function loadScheduleOptions() {
             const dayOfWeek =
                 getDayOfWeek(dateKey);
 
+
+            /*
+            남자 / 여자 정원
+            */
+
+            const maleLimit =
+                Number(
+                    schedule.maleLimit ?? 3
+                );
+
+
+            const femaleLimit =
+                Number(
+                    schedule.femaleLimit ?? 3
+                );
+
+
+            /*
+            모집 상태
+            */
+
+            const status =
+                String(
+                    schedule.status || ""
+                ).trim();
+
+
+            /*
+            마감 상태인 날짜는
+            신청 날짜 목록에서 제외
+            */
+
+            if (status === "마감") {
+                return;
+            }
+
+
+            /*
+            대기 상태도 신청 불가
+            */
+
+            if (status === "대기") {
+                return;
+            }
+
+
+            /*
+            남자/여자 정원이 모두 0이면
+            신청할 수 없으므로 제외
+            */
+
+            if (
+                maleLimit <= 0 &&
+                femaleLimit <= 0
+            ) {
+                return;
+            }
+
+
+            /*
+            옵션 생성
+            */
 
             const option =
                 document.createElement(
@@ -2736,8 +2959,27 @@ function loadScheduleOptions() {
     );
 
 
+    /*
+    날짜 변경 시
+    신청 현황 및 성별 버튼 갱신
+    */
+
     select.onchange =
-        updateGuestStatus;
+        function() {
+
+            updateGuestStatus();
+
+            updateGenderButtons();
+
+        };
+
+
+    /*
+    처음 열었을 때도
+    성별 버튼 상태 확인
+    */
+
+    updateGenderButtons();
 
 }
 
@@ -2761,9 +3003,7 @@ function updateGuestStatus() {
 
 
     if (!select || !status) {
-
         return;
-
     }
 
 
@@ -2771,15 +3011,25 @@ function updateGuestStatus() {
         select.value;
 
 
+    /*
+    날짜 미선택
+    */
+
     if (!dateKey) {
 
         status.innerHTML =
             "날짜를 선택해주세요.";
 
+        updateGenderButtons();
+
         return;
 
     }
 
+
+    /*
+    게스트 데이터
+    */
 
     const data =
         guestData[dateKey] || {
@@ -2790,6 +3040,10 @@ function updateGuestStatus() {
         };
 
 
+    /*
+    일정 데이터
+    */
+
     const schedule =
         scheduleData[dateKey];
 
@@ -2799,16 +3053,118 @@ function updateGuestStatus() {
         status.innerHTML =
             "선택한 날짜의 일정을 찾을 수 없습니다.";
 
+        updateGenderButtons();
+
         return;
 
     }
 
 
+    /*
+    요일
+    */
+
     const dayOfWeek =
         getDayOfWeek(dateKey);
 
 
-    status.innerHTML = `
+    /*
+    정원
+    */
+
+    const maleLimit =
+        Number(
+            schedule.maleLimit ?? 3
+        );
+
+
+    const femaleLimit =
+        Number(
+            schedule.femaleLimit ?? 3
+        );
+
+
+    /*
+    현재 인원
+    */
+
+    const maleCount =
+        Number(
+            data.male || 0
+        );
+
+
+    const femaleCount =
+        Number(
+            data.female || 0
+        );
+
+
+    /*
+    상태가 마감이면
+    */
+
+    if (
+        String(
+            schedule.status || ""
+        ).trim() === "마감"
+    ) {
+
+        status.innerHTML = `
+
+            <strong>
+                ${dayOfWeek}요일 ·
+                ${schedule.time || ""}
+            </strong>
+
+            <br>
+
+            모집이 마감되었습니다.
+
+        `;
+
+        updateGenderButtons();
+
+        return;
+
+    }
+
+
+    /*
+    상태가 대기면
+    */
+
+    if (
+        String(
+            schedule.status || ""
+        ).trim() === "대기"
+    ) {
+
+        status.innerHTML = `
+
+            <strong>
+                ${dayOfWeek}요일 ·
+                ${schedule.time || ""}
+            </strong>
+
+            <br>
+
+            모집 대기중입니다.
+
+        `;
+
+        updateGenderButtons();
+
+        return;
+
+    }
+
+
+    /*
+    표시할 성별 현황 생성
+    */
+
+    let statusHTML = `
 
         <strong>
 
@@ -2819,24 +3175,348 @@ function updateGuestStatus() {
 
         <br>
 
-        🔵 남자
-
-        <strong>
-            ${data.male}/3명
-        </strong>
-
-        &nbsp;&nbsp;
-
-        🔴 여자
-
-        <strong>
-            ${data.female}/3명
-        </strong>
-
     `;
 
-}
 
+    /*
+    남자 정원이 있는 경우
+    */
+
+    if (maleLimit > 0) {
+
+        statusHTML += `
+
+            🔵 남자
+
+            <strong>
+                ${maleCount}/${maleLimit}명
+            </strong>
+
+        `;
+
+    }
+
+
+    /*
+    남녀 모두 표시되는 경우 간격
+    */
+
+    if (
+        maleLimit > 0 &&
+        femaleLimit > 0
+    ) {
+
+        statusHTML += `
+            &nbsp;&nbsp;
+        `;
+
+    }
+
+
+    /*
+    여자 정원이 있는 경우
+    */
+
+    if (femaleLimit > 0) {
+
+        statusHTML += `
+
+            🔴 여자
+
+            <strong>
+                ${femaleCount}/${femaleLimit}명
+            </strong>
+
+        `;
+
+    }
+
+
+    /*
+    둘 다 0이면 모집하지 않음
+    */
+
+    if (
+        maleLimit <= 0 &&
+        femaleLimit <= 0
+    ) {
+
+        statusHTML += `
+
+            모집하지 않는 날짜입니다.
+
+        `;
+
+    }
+
+
+    status.innerHTML =
+        statusHTML;
+
+
+    /*
+    성별 버튼 갱신
+    */
+
+    updateGenderButtons();
+
+}
+    
+/* =====================================================
+   성별 신청 버튼 표시 / 숨김
+===================================================== */
+
+function updateGenderButtons() {
+
+    const select =
+        document.getElementById(
+            "guestDate"
+        );
+
+
+    if (!select) {
+        return;
+    }
+
+
+    /*
+    남자 / 여자 버튼
+    */
+
+    const maleInput =
+        document.querySelector(
+            '.gender-option input[value="남"]'
+        );
+
+
+    const femaleInput =
+        document.querySelector(
+            '.gender-option input[value="여"]'
+        );
+
+
+    if (!maleInput || !femaleInput) {
+        return;
+    }
+
+
+    const maleOption =
+        maleInput.closest(
+            ".gender-option"
+        );
+
+
+    const femaleOption =
+        femaleInput.closest(
+            ".gender-option"
+        );
+
+
+    /*
+    선택된 날짜
+    */
+
+    const dateKey =
+        select.value;
+
+
+    /*
+    날짜가 선택되지 않은 경우
+    둘 다 표시
+    */
+
+    if (!dateKey) {
+
+        if (maleOption) {
+
+            maleOption.style.display =
+                "block";
+
+        }
+
+
+        if (femaleOption) {
+
+            femaleOption.style.display =
+                "block";
+
+        }
+
+
+        maleInput.disabled =
+            false;
+
+
+        femaleInput.disabled =
+            false;
+
+
+        return;
+
+    }
+
+
+    /*
+    일정 정보
+    */
+
+    const schedule =
+        scheduleData[dateKey];
+
+
+    if (!schedule) {
+
+        if (maleOption) {
+
+            maleOption.style.display =
+                "none";
+
+        }
+
+
+        if (femaleOption) {
+
+            femaleOption.style.display =
+                "none";
+
+        }
+
+
+        maleInput.disabled =
+            true;
+
+
+        femaleInput.disabled =
+            true;
+
+
+        return;
+
+    }
+
+
+    /*
+    남자 / 여자 정원
+    */
+
+    const maleLimit =
+        Number(
+            schedule.maleLimit ?? 3
+        );
+
+
+    const femaleLimit =
+        Number(
+            schedule.femaleLimit ?? 3
+        );
+
+
+    /*
+    현재 게스트 수
+    */
+
+    const data =
+        guestData[dateKey] || {
+
+            male: 0,
+            female: 0
+
+        };
+
+
+    const maleCount =
+        Number(
+            data.male || 0
+        );
+
+
+    const femaleCount =
+        Number(
+            data.female || 0
+        );
+
+
+    /*
+    ========================================
+    남자 버튼
+    ========================================
+    */
+
+    if (
+        maleLimit <= 0 ||
+        maleCount >= maleLimit
+    ) {
+
+        if (maleOption) {
+
+            maleOption.style.display =
+                "none";
+
+        }
+
+        maleInput.disabled =
+            true;
+
+        maleInput.checked =
+            false;
+
+    }
+    else {
+
+        if (maleOption) {
+
+            maleOption.style.display =
+                "block";
+
+        }
+
+        maleInput.disabled =
+            false;
+
+    }
+
+
+    /*
+    ========================================
+    여자 버튼
+    ========================================
+    */
+
+    if (
+        femaleLimit <= 0 ||
+        femaleCount >= femaleLimit
+    ) {
+
+        if (femaleOption) {
+
+            femaleOption.style.display =
+                "none";
+
+        }
+
+        femaleInput.disabled =
+            true;
+
+        femaleInput.checked =
+            false;
+
+    }
+    else {
+
+        if (femaleOption) {
+
+            femaleOption.style.display =
+                "block";
+
+        }
+
+        femaleInput.disabled =
+            false;
+
+    }
+
+}
+    
 
 /* =====================================================
    신청창 열기
@@ -2864,9 +3544,26 @@ function openGuestForm() {
     modal.classList.add("show");
 
 
+    /*
+    일정 데이터가 이미 있으면
+    날짜 목록 생성
+    */
+
     loadScheduleOptions();
 
+
+    /*
+    신청 현황 표시
+    */
+
     updateGuestStatus();
+
+
+    /*
+    성별 버튼 표시 상태 확인
+    */
+
+    updateGenderButtons();
 
 }
 
@@ -2918,6 +3615,10 @@ function submitGuestForm() {
     setTimeout(
         function() {
 
+            /*
+            최신 게스트 데이터 불러오기
+            */
+
             loadGuestData();
 
 
@@ -2942,16 +3643,31 @@ function submitGuestForm() {
             }
 
 
+            /*
+            날짜 목록 다시 생성
+            */
+
             loadScheduleOptions();
 
+
+            /*
+            신청 현황 갱신
+            */
+
             updateGuestStatus();
+
+
+            /*
+            성별 버튼 갱신
+            */
+
+            updateGenderButtons();
 
         },
         2500
     );
 
 }
-
 
 /* =====================================================
    Google Sheets → 사이트 정보
