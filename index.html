@@ -961,6 +961,7 @@ footer {
 
 
 .modal-box input[type="text"],
+.modal-box input[type="tel"],
 .modal-box input[type="date"] {
 
     width: 100%;
@@ -982,7 +983,6 @@ footer {
     font-family:
         inherit;
 }
-
 
 .gender-buttons {
 
@@ -1641,121 +1641,280 @@ footer {
 
 
         <form
-            id="guestForm"
-            action="https://script.google.com/macros/s/AKfycbyLna-Zl8L5uJ9cJ-ASZlzmYHjWaMRbAKF5HQgYQc7MZOAZlIWoGlibOTVNBGE92tOD/exec"
-            method="POST"
-            target="submitFrame"
-            onsubmit="submitGuestForm()">
+    id="guestForm"
+    action="https://script.google.com/macros/s/AKfycbyLna-Zl8L5uJ9cJ-ASZlzmYHjWaMRbAKF5HQgYQc7MZOAZlIWoGlibOTVNBGE92tOD/exec"
+    method="POST"
+    target="submitFrame"
+    onsubmit="submitGuestForm()">
 
 
-            <label>
+    <!-- =========================
+         안내사항 동의
+    ========================== -->
 
-                이름
+    <div class="agree-box">
 
-            </label>
-
+        <label class="agree-option">
 
             <input
-                type="text"
-                name="name"
-                placeholder="이름을 입력해주세요"
+                type="checkbox"
+                name="guideAgree"
+                value="동의"
                 required>
 
+            <span>
+                안내사항을 확인했으며 동의합니다.
+            </span>
 
-            <label>
+        </label>
 
-                날짜
-
-            </label>
+    </div>
 
 
-            <select
-                name="date"
-                id="guestDate"
+    <!-- =========================
+         개인정보 동의
+    ========================== -->
+
+    <div class="agree-box">
+
+        <label class="agree-option">
+
+            <input
+                type="checkbox"
+                name="privacyAgree"
+                value="동의"
                 required>
 
+            <span>
+                개인정보 수집 및 이용에 동의합니다.
+            </span>
 
-                <option value="">
+        </label>
 
-                    신청할 날짜를 선택해주세요
+    </div>
+/* =====================================================
+   동의 체크박스
+===================================================== */
 
-                </option>
+.agree-box {
 
+    margin-bottom: 12px;
 
-            </select>
+    padding:
+        11px 12px;
 
+    border:
+        1px solid #e1e7eb;
 
-            <div
-                id="guestStatus"
-                class="guest-status">
+    border-radius: 9px;
 
-                날짜를 선택해주세요.
-
-            </div>
-
-
-            <label>
-
-                성별
-
-            </label>
-
-
-            <div class="gender-buttons">
+    background:
+        #ffffff;
+}
 
 
-                <label class="gender-option">
+.agree-option {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 8px;
+
+    margin: 0 !important;
+
+    font-size: 12px !important;
+
+    line-height: 1.5;
+
+    font-weight: 500 !important;
+
+    cursor: pointer;
+}
 
 
-                    <input
-                        type="radio"
-                        name="gender"
-                        value="남"
-                        required>
+.agree-option input {
+
+    width: 16px;
+    height: 16px;
+
+    margin: 1px 0 0;
+
+    flex-shrink: 0;
+
+    accent-color: #105c96;
+
+    cursor: pointer;
+}
 
 
-                    <span>
+.agree-option span {
 
-                        🔵 남
+    display: block;
 
-                    </span>
+    padding: 0;
 
+    border: none;
 
-                </label>
+    background: transparent;
 
+    text-align: left;
 
-                <label class="gender-option">
+    font-size: 12px;
 
+    cursor: pointer;
+}
+            
 
-                    <input
-                        type="radio"
-                        name="gender"
-                        value="여">
+    <!-- =========================
+         이름
+    ========================== -->
 
+    <label>
+        이름
+    </label>
 
-                    <span>
-
-                        🔴 여
-
-                    </span>
-
-
-                </label>
-
-
-            </div>
-
-
-            <button
-                type="submit"
-                class="submit-button">
-
-                신청하기
-
-            </button>
+    <input
+        type="text"
+        name="name"
+        placeholder="이름을 입력해주세요"
+        required>
 
 
-        </form>
+    <!-- =========================
+         연락처
+    ========================== -->
+
+    <label>
+        연락처
+    </label>
+
+    <input
+        type="tel"
+        name="phone"
+        placeholder="010-1234-5678"
+        inputmode="tel"
+        required>
+
+
+    <!-- =========================
+         날짜
+    ========================== -->
+
+    <label>
+        날짜
+    </label>
+
+    <select
+        name="date"
+        id="guestDate"
+        required>
+
+        <option value="">
+            신청할 날짜를 선택해주세요
+        </option>
+
+    </select>
+
+
+    <!-- =========================
+         신청 현황
+    ========================== -->
+
+    <div
+        id="guestStatus"
+        class="guest-status">
+
+        날짜를 선택해주세요.
+
+    </div>
+
+
+    <!-- =========================
+         성별
+    ========================== -->
+
+    <label>
+        성별
+    </label>
+
+    <div class="gender-buttons">
+
+        <label class="gender-option">
+
+            <input
+                type="radio"
+                name="gender"
+                value="남"
+                required>
+
+            <span>
+                🔵 남
+            </span>
+
+        </label>
+
+
+        <label class="gender-option">
+
+            <input
+                type="radio"
+                name="gender"
+                value="여">
+
+            <span>
+                🔴 여
+            </span>
+
+        </label>
+
+    </div>
+
+
+    <!-- =========================
+         입금자명
+    ========================== -->
+
+    <label>
+        입금자명
+    </label>
+
+    <input
+        type="text"
+        name="payerName"
+        placeholder="입금자명을 입력해주세요"
+        required>
+
+
+    <!-- =========================
+         환불계좌
+    ========================== -->
+
+    <label>
+        환불계좌
+    </label>
+
+    <input
+        type="text"
+        name="refundAccount"
+        placeholder="은행명 + 계좌번호"
+        required>
+
+
+    <!-- =========================
+         신청 버튼
+    ========================== -->
+
+    <button
+        type="submit"
+        class="submit-button">
+
+        신청하기
+
+    </button>
+
+
+</form>
 
 
         <div
