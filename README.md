@@ -1,2 +1,2 @@
-# guest
+# guest info
 SEOLBONG VALLEYBALL CLUB GUEST INFO
